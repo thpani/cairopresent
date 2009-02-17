@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""GTK GUI for CairoPresent."""
+
 import os
 
 import pygtk
@@ -9,6 +11,8 @@ import gtk
 from cairopresent import render
 
 class MainWindow(gtk.Window):
+    """Main presentation window."""
+    
     def __init__(self, slides):
         gtk.Window.__init__(self)
         
@@ -29,7 +33,7 @@ class MainWindow(gtk.Window):
         self.show_all()
 
     def on_key_press(self, win, event):
-        """Callback for key_press_event."""
+        """Callback for key-press-event."""
         key = gtk.gdk.keyval_name(event.keyval)
         if key in ('f', 'F', 'F5'):
             if self._is_fullscreen:
@@ -55,16 +59,19 @@ class MainWindow(gtk.Window):
         return True
     
     def on_window_state(self, win, event):
-        """Callback for window_state_event."""
+        """Callback for window-state-event."""
         self._is_fullscreen = bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN)
     
         return False
     
     def expose(self, drawing_area, event):
+        """Callback for expose-event."""
         cr = drawing_area.window.cairo_create()
         cr_width, cr_height = drawing_area.window.get_size()
         current_slide = self.slides[self.current_slide_index]
         render.render_slide(cr, cr_width, cr_height, current_slide)
+        
+        return False
     
 def main():
     f0 = os.path.expanduser('~/test.png')
