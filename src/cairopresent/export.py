@@ -12,24 +12,22 @@ import cairopresent
 class Export(object):
     """Exports slides to graphics files.
     
-    B{Abstract. Implementations must override C{render(self)}.}
+    @attention: Abstract! Implementations must override C{render(self)}.
     """
     
-    def __init__(self, slides, filename, geometry, renderer=cairopresent.render.pz):
+    def __init__(self, presentation, filename, geometry):
         """Creates a graphics export object.
         
-        @param slides:    The slides to export.
+        @param presentation: The presentation to export.
         @type  filename:  string
         @param filename:  Basename (w/o extension). To get I{foo-{0,1,2,3,...}.ext}, supply C{filename="foo"}. Implementation will decide on I{ext}.
         @type  geometry:  tuple
         @param geometry:  (width, height)
-        @type  renderer:  module
-        @param renderer:  Renderer to use.
         """
-        self.slides = slides
+        self.slides = presentation.slides
+        self.renderer = presentation.renderer
         self.filename = filename
         self.width, self.height = geometry
-        self.renderer = renderer
         
     def render(self):
         """Starts rendering the slides."""
@@ -39,9 +37,9 @@ class Export(object):
 class PDFExport(Export):
     """Exports slides to a PNG file."""
     
-    def __init__(self, slides, filename="pdffile.pdf", geometry=(1024, 768)):
+    def __init__(self, presentation, filename="pdffile.pdf", geometry=(1024, 768)):
         """Creates a PDF export object."""
-        Export.__init__(self, slides, filename, geometry)
+        Export.__init__(self, presentation, filename, geometry)
     
     def render(self):
         surface = cairo.PDFSurface(self.filename, self.width, self.height)
@@ -54,9 +52,9 @@ class PDFExport(Export):
 class SVGExport(Export):
     """Exports slides to SVG files."""
     
-    def __init__(self, slides, filename="svgfile", geometry=(640, 480)):
+    def __init__(self, presentation, filename="svgfile", geometry=(640, 480)):
         """Creates a SVG export object."""
-        Export.__init__(self, slides, filename, geometry)
+        Export.__init__(self, presentation, filename, geometry)
     
     def render(self):
         for index, slide in enumerate(self.slides):
@@ -69,9 +67,9 @@ class SVGExport(Export):
 class PNGExport(Export):
     """Exports slides to PNG files."""
     
-    def __init__(self, slides, filename="pngfile", geometry=(1024, 768)):
+    def __init__(self, presentation, filename="pngfile", geometry=(1024, 768)):
         """Creates a PNG export object."""
-        Export.__init__(self, slides, filename, geometry)
+        Export.__init__(self, presentation, filename, geometry)
     
     def render(self):
         for index, slide in enumerate(self.slides):
@@ -85,7 +83,7 @@ class PNGExport(Export):
 class PILExport(Export):
     """Exports slides through PIL."""
         
-    def __init__(self, slides, extension, filename="pilfile", geometry=(1024, 768)):
+    def __init__(self, presentation, extension, filename="pilfile", geometry=(1024, 768)):
         """Creates a PIL export object.
         
         @param slides:    The slides to export.
@@ -96,7 +94,7 @@ class PILExport(Export):
         @type  geometry:  tuple
         @param geometry:  (width, height)
         """
-        Export.__init__(self, slides, filename, geometry)
+        Export.__init__(self, presentation, filename, geometry)
         self.extension = extension
     
     def render(self):
@@ -123,30 +121,23 @@ def main():
     file1 = os.path.expanduser('~/images/stock/computer/161547780_81e990d7f7_o.jpg')
     file2 = os.path.expanduser('~/images/stock/noch_fragen/277386361_13b04e9d98_o.jpg')
     
-    png = PNGExport([(file0, "Noch Fragen?"),
-                     (file1, "A History of\nComputing Machinery"),
-                     (file2, "Noch immer\nFragen?!")]
-    )
+    slides = [(file0, "Noch Fragen?"),
+              (file1, "A History of\nComputing Machinery"),
+              (file2, "Noch immer\nFragen?!")]
+            
+    presentation = cairopresent.render.pz.Presentation(slides)
+    
+    png = PNGExport(presentation)
     png.render()
     
     # these get really huge :-\
-#    svg = SVGExport([(file0, "Noch Fragen?"),
-#                     (file1, "A History of\nComputing Machinery"),
-#                     (file2, "Noch immer\nFragen?!")]
-#    )
+#    svg = SVGExport(presentation)
 #    svg.render()
     
-    jpg = PILExport([(file0, "Noch Fragen?"),
-                     (file1, "A History of\nComputing Machinery"),
-                     (file2, "Noch immer\nFragen?!")],
-                    "jpg"
-    )
+    jpg = PILExport(presentation, "jpg")
     jpg.render()
     
-    pdf = PDFExport([(file0, "Noch Fragen?"),
-                     (file1, "A History of\nComputing Machinery"),
-                     (file2, "Noch immer\nFragen?!")]
-    )
+    pdf = PDFExport(presentation)
     pdf.render()
 
 

@@ -13,13 +13,13 @@ import cairopresent
 class MainWindow(gtk.Window):
     """Main presentation window."""
     
-    def __init__(self, slides, renderer=cairopresent.render.pz):
+    def __init__(self, presentation):
         gtk.Window.__init__(self)
         
-        self.slides = slides
+        self.slides = presentation.slides
         self.current_slide_index = 0
         
-        self.renderer = renderer
+        self.renderer = presentation.renderer
         
         self.set_default_size(800, 600)
         self._is_fullscreen = False
@@ -56,7 +56,7 @@ class MainWindow(gtk.Window):
             else:
                 gtk.main_quit()
         else:
-            print key
+            print key   # TODO
         
         return True
     
@@ -76,14 +76,17 @@ class MainWindow(gtk.Window):
         return False
     
 def main():
-    f0 = os.path.expanduser('~/test.png')
-    f1 = os.path.expanduser('~/images/stock/computer/161547780_81e990d7f7_o.jpg')
-    f2 = os.path.expanduser('~/images/stock/noch_fragen/277386361_13b04e9d98_o.jpg')
+    file0 = os.path.expanduser('~/test.png')
+    file1 = os.path.expanduser('~/images/stock/computer/161547780_81e990d7f7_o.jpg')
+    file2 = os.path.expanduser('~/images/stock/noch_fragen/277386361_13b04e9d98_o.jpg')
     
-    win = MainWindow([(f0, "Noch Fragen?"),
-                      (f1, "A History of\nComputing Machinery"),
-                      (f2, "Noch immer\nFragen?!")]
-    )
+    slides = [(file0, "Noch Fragen?"),
+              (file1, "A History of\nComputing Machinery"),
+              (file2, "Noch immer\nFragen?!")]
+    
+    presentation = cairopresent.render.pz.Presentation(slides)
+    
+    MainWindow(presentation)
     gtk.main()
 
 if __name__ == '__main__':
