@@ -1,7 +1,7 @@
 import pango
 import pangocairo
 
-from cairopresent import imageloader
+from cairopresent.render import imageloader
 
 def render_slide(cr, cr_width, cr_height, current_slide):
     # load image surface

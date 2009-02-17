@@ -6,7 +6,7 @@ import os
 
 import cairo
 
-from cairopresent import render
+import cairopresent
 
 
 class Export(object):
@@ -15,7 +15,7 @@ class Export(object):
     B{Abstract. Implementations must override C{render(self)}.}
     """
     
-    def __init__(self, slides, filename, geometry):
+    def __init__(self, slides, filename, geometry, renderer=cairopresent.render.pz):
         """Creates a graphics export object.
         
         @param slides:    The slides to export.
@@ -23,10 +23,13 @@ class Export(object):
         @param filename:  Basename (w/o extension). To get I{foo-{0,1,2,3,...}.ext}, supply C{filename="foo"}. Implementation will decide on I{ext}.
         @type  geometry:  tuple
         @param geometry:  (width, height)
+        @type  renderer:  module
+        @param renderer:  Renderer to use.
         """
         self.slides = slides
         self.filename = filename
         self.width, self.height = geometry
+        self.renderer = renderer
         
     def render(self):
         """Starts rendering the slides."""
@@ -44,7 +47,7 @@ class PDFExport(Export):
         surface = cairo.PDFSurface(self.filename, self.width, self.height)
         cr = cairo.Context(surface)
         for slide in self.slides:
-            render.render_slide(cr, self.width, self.height, slide)
+            self.renderer.render_slide(cr, self.width, self.height, slide)
             cr.show_page()
     
     
@@ -60,7 +63,7 @@ class SVGExport(Export):
             surface = cairo.SVGSurface("%s-%d.svg" % (self.filename, index),
                                        self.width, self.height)
             cr = cairo.Context(surface)
-            render.render_slide(cr, self.width, self.height, slide)
+            self.renderer.render_slide(cr, self.width, self.height, slide)
 
 
 class PNGExport(Export):
@@ -75,7 +78,7 @@ class PNGExport(Export):
             surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
                                          self.width, self.height)
             cr = cairo.Context(surface)
-            render.render_slide(cr, self.width, self.height, slide)
+            self.renderer.render_slide(cr, self.width, self.height, slide)
             surface.write_to_png("%s-%d.png" % (self.filename, index))
             
             
@@ -103,7 +106,7 @@ class PILExport(Export):
             surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
                                          self.width, self.height)
             cr = cairo.Context(surface)
-            render.render_slide(cr, self.width, self.height, slide)
+            self.renderer.render_slide(cr, self.width, self.height, slide)
             
             image = Image.fromstring("RGBA", (self.width, self.height), surface.get_data())
            

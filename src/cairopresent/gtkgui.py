@@ -8,16 +8,18 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-from cairopresent import render
+import cairopresent
 
 class MainWindow(gtk.Window):
     """Main presentation window."""
     
-    def __init__(self, slides):
+    def __init__(self, slides, renderer=cairopresent.render.pz):
         gtk.Window.__init__(self)
         
         self.slides = slides
         self.current_slide_index = 0
+        
+        self.renderer = renderer
         
         self.set_default_size(800, 600)
         self._is_fullscreen = False
@@ -69,7 +71,7 @@ class MainWindow(gtk.Window):
         cr = drawing_area.window.cairo_create()
         cr_width, cr_height = drawing_area.window.get_size()
         current_slide = self.slides[self.current_slide_index]
-        render.render_slide(cr, cr_width, cr_height, current_slide)
+        self.renderer.render_slide(cr, cr_width, cr_height, current_slide)
         
         return False
     
