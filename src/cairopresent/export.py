@@ -125,7 +125,7 @@ def main():
               (file1, "A History of\nComputing Machinery"),
               (file2, "Noch immer\nFragen?!")]
             
-    presentation = cairopresent.render.pz.Presentation(slides)
+    presentation = cairopresent.render.gsi.Presentation(slides)
     
     png = PNGExport(presentation)
     png.render()

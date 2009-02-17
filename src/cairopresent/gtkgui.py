@@ -16,6 +16,9 @@ class MainWindow(gtk.Window):
     def __init__(self, presentation):
         gtk.Window.__init__(self)
         
+        self.set_title("CairoPresent")
+        self.set_icon_from_file('/usr/share/icons/gnome/scalable/mimetypes/x-office-presentation.svg')
+        
         self.slides = presentation.slides
         self.current_slide_index = 0
         
@@ -42,19 +45,25 @@ class MainWindow(gtk.Window):
                 self.unfullscreen()
             else:
                 self.fullscreen()
-        elif key in ('Right', 'space'):
+        elif key in ('Right', 'space', 'Page_Down'):
             if self.current_slide_index + 1 < len(self.slides):
                 self.current_slide_index += 1
                 self.drawing_area.queue_draw()
-        elif key in ('Left', 'BackSpace'):
+        elif key in ('Left', 'BackSpace', 'Page_Up'):
             if self.current_slide_index > 0:
                 self.current_slide_index -= 1
                 self.drawing_area.queue_draw()
+        elif key in ('Home'):
+            self.current_slide_index = 0
+            self.drawing_area.queue_draw()
+        elif key in ('End'):
+            self.current_slide_index = len(self.slides) - 1
+            self.drawing_area.queue_draw()
         elif key in ('Escape'):
             if self._is_fullscreen:
                 self.unfullscreen()
             else:
-                gtk.main_quit()
+                self.destroy()
         else:
             print key   # TODO
         
@@ -84,7 +93,20 @@ def main():
               (file1, "A History of\nComputing Machinery"),
               (file2, "Noch immer\nFragen?!")]
     
-    presentation = cairopresent.render.pz.Presentation(slides)
+    presentation = cairopresent.render.gsi.Presentation(slides)
+    
+    w = MainWindow(presentation)
+    gtk.main()
+    
+    presentation = cairopresent.render.lessig.Presentation(
+                        [("What if Steve Jobs let\nLarry Lessig\nhold a keynote presentation?", False),
+                         ("amazing", False),
+                         ("iPhone", True),
+                         ("$3000", False),
+                         ("in Stores", False),
+                         ("! TOMORROW !", True),
+                         ]
+                        )
     
     MainWindow(presentation)
     gtk.main()

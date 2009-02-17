@@ -1,4 +1,4 @@
-"""Presentation Zen style Presentation and Renderer."""
+"""Purgathofer style Presentation and Renderer."""
 
 import pango
 import pangocairo
@@ -7,13 +7,13 @@ from cairopresent.render import imageloader
 
 
 class Presentation(object):
-    """A presentation for Presentation Zen style rendering.
+    """A presentation for Purgathofer style rendering.
     
     Slides will have a blown up background image, and a simple text in a transparent grey box. 
     """
      
     def __init__(self, slides):
-        """Creates a PZ style presentation object.
+        """Creates a Purgathofer style presentation object.
         
         @type  slides: list of tuples
         @param slides: A list of tuples given as C{(bg_image_path, text)}.
@@ -23,9 +23,9 @@ class Presentation(object):
         
         
 class Renderer(object):
-    """A renderer for Presentation Zen style rendering.
+    """A renderer for Purgathofer style rendering.
     
-    @attention: Don't use directly. This will be used automatically when rendering a C{cairopresent.render.pz.Presentation}!
+    @attention: Don't use directly. This will be used automatically when rendering a C{cairopresent.render.gsi.Presentation}!
     """
     
     @classmethod
