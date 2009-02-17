@@ -1,7 +1,7 @@
 import pango
 import pangocairo
 
-import imageloader
+from cairopresent import imageloader
 
 def render_slide(cr, cr_width, cr_height, current_slide):
     # load image surface
@@ -10,7 +10,7 @@ def render_slide(cr, cr_width, cr_height, current_slide):
         try:
             # causes MemoryError if filename doesn't point to a PNG
             image_surface = imageloader.image_surface_with_cairo(current_slide[0])
-        except:
+        except MemoryError:
             image_surface = imageloader.image_surface_with_pil(current_slide[0])
     else:
         image_surface = imageloader.image_surface_with_pil(current_slide[0])

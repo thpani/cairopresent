@@ -1,12 +1,8 @@
+"""ImageSurface loading routines."""
+
 import array
-import logging
 
 import cairo
-
-try:
-    import Image
-except ImportError:
-    logging.warn("PIL wasn't found. Loadable pictures are limited to PNG!")
 
 ##
 # image load/paint performance
@@ -32,6 +28,8 @@ def image_surface_with_pil(filename):
     @type  filename: string
     @param filename: path to image file 
     """
+    
+    import Image
     
     image = Image.open(filename)
     width, height = image.size

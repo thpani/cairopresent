@@ -6,7 +6,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-import render
+from cairopresent import render
 
 class MainWindow(gtk.Window):
     def __init__(self, slides):
@@ -32,10 +32,10 @@ class MainWindow(gtk.Window):
         """Callback for key_press_event."""
         key = gtk.gdk.keyval_name(event.keyval)
         if key in ('f', 'F', 'F5'):
-            if win._is_fullscreen:
-                win.unfullscreen()
+            if self._is_fullscreen:
+                self.unfullscreen()
             else:
-                win.fullscreen()
+                self.fullscreen()
         elif key in ('Right', 'space'):
             if self.current_slide_index + 1 < len(self.slides):
                 self.current_slide_index += 1
@@ -45,8 +45,8 @@ class MainWindow(gtk.Window):
                 self.current_slide_index -= 1
                 self.drawing_area.queue_draw()
         elif key in ('Escape'):
-            if win._is_fullscreen:
-                win.unfullscreen()
+            if self._is_fullscreen:
+                self.unfullscreen()
             else:
                 gtk.main_quit()
         else:
@@ -56,7 +56,7 @@ class MainWindow(gtk.Window):
     
     def on_window_state(self, win, event):
         """Callback for window_state_event."""
-        win._is_fullscreen = bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN)
+        self._is_fullscreen = bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN)
     
         return False
     

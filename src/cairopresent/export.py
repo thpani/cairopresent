@@ -6,7 +6,7 @@ import os
 
 import cairo
 
-import render
+from cairopresent import render
 
 
 class Export(object):
@@ -34,6 +34,8 @@ class Export(object):
 
 
 class PDFExport(Export):
+    """Exports slides to a PNG file."""
+    
     def __init__(self, slides, filename="pdffile.pdf", geometry=(1024, 768)):
         """Creates a PDF export object."""
         Export.__init__(self, slides, filename, geometry)
