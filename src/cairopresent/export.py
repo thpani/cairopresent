@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Provides PNG and SVG export routines."""
+"""Provides PDF, PNG, SVG and PIL export routines."""
 
 import os
 
@@ -9,7 +9,7 @@ import cairo
 import render
 
 
-class GraphicsExport(object):
+class Export(object):
     """Exports slides to graphics files.
     
     B{Abstract. Implementations must override C{render(self)}.}
@@ -33,12 +33,25 @@ class GraphicsExport(object):
         raise NotImplementedError
 
 
-class SVGExport(GraphicsExport):
+class PDFExport(Export):
+    def __init__(self, slides, filename="pdffile.pdf", geometry=(1024, 768)):
+        """Creates a PDF export object."""
+        Export.__init__(self, slides, filename, geometry)
+    
+    def render(self):
+        surface = cairo.PDFSurface(self.filename, self.width, self.height)
+        cr = cairo.Context(surface)
+        for slide in self.slides:
+            render.render_slide(cr, self.width, self.height, slide)
+            cr.show_page()
+    
+    
+class SVGExport(Export):
     """Exports slides to SVG files."""
     
     def __init__(self, slides, filename="svgfile", geometry=(640, 480)):
         """Creates a SVG export object."""
-        GraphicsExport.__init__(self, slides, filename, geometry)
+        Export.__init__(self, slides, filename, geometry)
     
     def render(self):
         for index, slide in enumerate(self.slides):
@@ -48,12 +61,12 @@ class SVGExport(GraphicsExport):
             render.render_slide(cr, self.width, self.height, slide)
 
 
-class PNGExport(GraphicsExport):
+class PNGExport(Export):
     """Exports slides to PNG files."""
     
     def __init__(self, slides, filename="pngfile", geometry=(1024, 768)):
         """Creates a PNG export object."""
-        GraphicsExport.__init__(self, slides, filename, geometry)
+        Export.__init__(self, slides, filename, geometry)
     
     def render(self):
         for index, slide in enumerate(self.slides):
@@ -63,7 +76,8 @@ class PNGExport(GraphicsExport):
             render.render_slide(cr, self.width, self.height, slide)
             surface.write_to_png("%s-%d.png" % (self.filename, index))
             
-class PILExport(GraphicsExport):
+            
+class PILExport(Export):
     """Exports slides through PIL."""
         
     def __init__(self, slides, extension, filename="pilfile", geometry=(1024, 768)):
@@ -77,7 +91,7 @@ class PILExport(GraphicsExport):
         @type  geometry:  tuple
         @param geometry:  (width, height)
         """
-        GraphicsExport.__init__(self, slides, filename, geometry)
+        Export.__init__(self, slides, filename, geometry)
         self.extension = extension
     
     def render(self):
@@ -90,7 +104,14 @@ class PILExport(GraphicsExport):
             render.render_slide(cr, self.width, self.height, slide)
             
             image = Image.fromstring("RGBA", (self.width, self.height), surface.get_data())
+           
+            # swap B and R channel
+            # TODO: why do we need this?!
+            r, g, b, a = image.split()
+            image = Image.merge('RGBA', (b, g, r, a))
+    
             image.save("%s-%d.%s" % (self.filename, index, self.extension))
+    
     
 def main():
     file0 = os.path.expanduser('~/test.png')
@@ -103,12 +124,12 @@ def main():
     )
     png.render()
     
-    
-    svg = SVGExport([(file0, "Noch Fragen?"),
-                     (file1, "A History of\nComputing Machinery"),
-                     (file2, "Noch immer\nFragen?!")]
-    )
-    svg.render()
+    # these get really huge :-\
+#    svg = SVGExport([(file0, "Noch Fragen?"),
+#                     (file1, "A History of\nComputing Machinery"),
+#                     (file2, "Noch immer\nFragen?!")]
+#    )
+#    svg.render()
     
     jpg = PILExport([(file0, "Noch Fragen?"),
                      (file1, "A History of\nComputing Machinery"),
@@ -116,6 +137,13 @@ def main():
                     "jpg"
     )
     jpg.render()
+    
+    pdf = PDFExport([(file0, "Noch Fragen?"),
+                     (file1, "A History of\nComputing Machinery"),
+                     (file2, "Noch immer\nFragen?!")]
+    )
+    pdf.render()
+
 
 if __name__ == '__main__':
     main()
