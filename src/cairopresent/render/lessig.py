@@ -41,7 +41,7 @@ class Presentation(object):
                 line = line.replace('>', '&gt;')
                 while '*' in line:
                     if not open_emph:
-                        line = line.replace('*', '<span color="#990000">', 1)
+                        line = line.replace('*', '<span color="#BB0000">', 1)
                     else:
                         line = line.replace('*', '</span>', 1)
                     open_emph = not open_emph

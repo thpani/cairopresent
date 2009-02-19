@@ -106,20 +106,11 @@ def main():
               (file1, "A History of\nComputing Machinery"),
               (file2, "Noch immer\nFragen?!")]
     
-    presentation = cairopresent.render.gsi.Presentation(slides)
+    presentation = cairopresent.render.thp.Presentation(slides)
     
-    w = MainWindow(presentation)
+    MainWindow(presentation)
     gtk.main()
     
-#    presentation = cairopresent.render.lessig.Presentation(
-#                        [("What if Steve Jobs let\nLarry Lessig\nhold a keynote presentation?", False),
-#                         ("amazing", False),
-#                         ("iPhone", True),
-#                         ("$3000", False),
-#                         ("in Stores", False),
-#                         ("! TOMORROW !", True),
-#                         ]
-#                        )
     presentation = cairopresent.render.lessig.Presentation('../../examples/lessig/lessig.txt')
     
     MainWindow(presentation)
