@@ -21,6 +21,7 @@ class MainWindow(gtk.Window):
         
         self.slides = presentation.slides
         self.current_slide_index = 0
+        self.goto_buffer = None
         
         self.renderer = presentation.renderer
         
@@ -64,6 +65,18 @@ class MainWindow(gtk.Window):
                 self.unfullscreen()
             else:
                 self.destroy()
+        elif key in map(str, range(10)):
+            if self.goto_buffer is None:
+                self.goto_buffer = key
+            else:
+                self.goto_buffer += key
+        elif key in ('Return', 'g', 'G'):
+            if self.goto_buffer is not None:
+                target = int(self.goto_buffer)-1
+                if 0 <= target < len(self.slides):
+                    self.current_slide_index = target
+                    self.drawing_area.queue_draw()
+                self.goto_buffer = None
         else:
             print key   # TODO
         
@@ -98,15 +111,16 @@ def main():
     w = MainWindow(presentation)
     gtk.main()
     
-    presentation = cairopresent.render.lessig.Presentation(
-                        [("What if Steve Jobs let\nLarry Lessig\nhold a keynote presentation?", False),
-                         ("amazing", False),
-                         ("iPhone", True),
-                         ("$3000", False),
-                         ("in Stores", False),
-                         ("! TOMORROW !", True),
-                         ]
-                        )
+#    presentation = cairopresent.render.lessig.Presentation(
+#                        [("What if Steve Jobs let\nLarry Lessig\nhold a keynote presentation?", False),
+#                         ("amazing", False),
+#                         ("iPhone", True),
+#                         ("$3000", False),
+#                         ("in Stores", False),
+#                         ("! TOMORROW !", True),
+#                         ]
+#                        )
+    presentation = cairopresent.render.lessig.Presentation('../../examples/lessig/lessig.txt')
     
     MainWindow(presentation)
     gtk.main()

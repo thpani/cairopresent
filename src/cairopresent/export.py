@@ -127,19 +127,22 @@ def main():
             
     presentation = cairopresent.render.gsi.Presentation(slides)
     
-    png = PNGExport(presentation)
-    png.render()
-    
+#    png = PNGExport(presentation)
+#    png.render()
+#    
     # these get really huge :-\
 #    svg = SVGExport(presentation)
 #    svg.render()
+#    
+#    jpg = PILExport(presentation, "jpg")
+#    jpg.render()
+#    
+#    pdf = PDFExport(presentation)
+#    pdf.render()
     
-    jpg = PILExport(presentation, "jpg")
-    jpg.render()
-    
+    presentation = cairopresent.render.lessig.Presentation('../../examples/lessig/lessig.txt')
     pdf = PDFExport(presentation)
     pdf.render()
-
 
 if __name__ == '__main__':
     main()

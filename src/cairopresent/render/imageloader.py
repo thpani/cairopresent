@@ -36,8 +36,9 @@ def image_surface_with_pil(filename):
     
     # swap B and R channel
     # TODO: why do we need this?!
-    r, g, b = image.split()
-    image = Image.merge('RGB', (b, g, r))
+    if image.mode == 'RGB':
+        r, g, b = image.split()
+        image = Image.merge('RGB', (b, g, r))
     image = image.convert('RGBA')
     
     data = array.array('c', image.tostring())
