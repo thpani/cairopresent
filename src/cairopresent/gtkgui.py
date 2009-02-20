@@ -9,6 +9,7 @@ pygtk.require('2.0')
 import gtk
 
 import cairopresent
+from cairopresent.helpers.resources import *
 
 class MainWindow(gtk.Window):
     """Main presentation window."""
@@ -17,7 +18,7 @@ class MainWindow(gtk.Window):
         gtk.Window.__init__(self)
         
         self.set_title("CairoPresent")
-        self.set_icon_from_file('/usr/share/icons/gnome/scalable/mimetypes/x-office-presentation.svg')
+        self.set_icon_from_file(get_res('icon.svg'))
         
         self.slides = presentation.slides
         self.current_slide_index = 0
@@ -98,9 +99,9 @@ class MainWindow(gtk.Window):
         return False
     
 def main():
-    file0 = os.path.expanduser('~/test.png')
-    file1 = os.path.expanduser('~/images/stock/computer/161547780_81e990d7f7_o.jpg')
-    file2 = os.path.expanduser('~/images/stock/noch_fragen/277386361_13b04e9d98_o.jpg')
+    file0 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', 'test.png')
+    file1 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', '161547780_81e990d7f7_o.jpg')
+    file2 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', '277386361_13b04e9d98_o.jpg')
     
     slides = [(file0, "Noch Fragen?"),
               (file1, "A History of\nComputing Machinery"),
@@ -111,7 +112,7 @@ def main():
     MainWindow(presentation)
     gtk.main()
     
-    presentation = cairopresent.render.lessig.Presentation('../../examples/lessig/lessig.txt')
+    presentation = cairopresent.render.lessig.Presentation(get_example('lessig.txt'))
     
     MainWindow(presentation)
     gtk.main()

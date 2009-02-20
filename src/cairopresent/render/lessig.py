@@ -5,7 +5,7 @@ import os
 import pango
 import pangocairo
 
-from cairopresent.render import imageloader
+from cairopresent.helpers import imageloader
 
 
 class Presentation(object):
