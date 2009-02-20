@@ -7,6 +7,7 @@ import os
 import cairo
 
 import cairopresent
+from cairopresent.helpers.resources import get_example
 
 
 class Export(object):
@@ -117,9 +118,9 @@ class PILExport(Export):
     
     
 def main():
-    file0 = os.path.expanduser('~/test.png')
-    file1 = os.path.expanduser('~/images/stock/computer/161547780_81e990d7f7_o.jpg')
-    file2 = os.path.expanduser('~/images/stock/noch_fragen/277386361_13b04e9d98_o.jpg')
+    file0 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', 'test.png')
+    file1 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', '161547780_81e990d7f7_o.jpg')
+    file2 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', '277386361_13b04e9d98_o.jpg')
     
     slides = [(file0, "Noch Fragen?"),
               (file1, "A History of\nComputing Machinery"),
@@ -140,7 +141,7 @@ def main():
     pdf = PDFExport(presentation, "thp.pdf")
     pdf.render()
     
-    presentation = cairopresent.render.lessig.Presentation('../../examples/lessig/lessig.txt')
+    presentation = cairopresent.render.lessig.Presentation(get_example('lessig.txt'))
     pdf = PDFExport(presentation, "lessig.pdf")
     pdf.render()
 
