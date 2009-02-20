@@ -46,7 +46,9 @@ class Presentation(object):
                         line = line.replace('*', '</span>', 1)
                     open_emph = not open_emph
                 current_slide += line
-                
+        
+        if current_slide:
+            slides.append(current_slide)
                         
         return slides
         
