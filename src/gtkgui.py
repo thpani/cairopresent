@@ -18,7 +18,7 @@ class MainWindow(gtk.Window):
         gtk.Window.__init__(self)
         
         self.set_title("CairoPresent")
-        self.set_icon_from_file(get_res('icon.svg'))
+        self.set_icon_from_file(get_res('icon.png'))
         
         self.slides = presentation.slides
         self.current_slide_index = 0
