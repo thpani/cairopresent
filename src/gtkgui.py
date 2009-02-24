@@ -32,12 +32,22 @@ class MainWindow(gtk.Window):
         self.drawing_area = gtk.DrawingArea()
         self.add(self.drawing_area)
         
+        self.set_events(gtk.gdk.EXPOSURE_MASK | gtk.gdk.BUTTON_PRESS_MASK)
+
         self.connect('destroy', gtk.main_quit)
+        self.connect('button_press_event', self.on_button_press)
         self.connect('key_press_event', self.on_key_press)
         self.connect('window_state_event', self.on_window_state)
         self.drawing_area.connect('expose_event', self.expose)
         
         self.show_all()
+
+    def on_button_press(self, win, event):
+        x, y, state = event.window.get_pointer()
+        if state & gtk.gdk.BUTTON1_MASK:
+            if self.current_slide_index + 1 < len(self.slides):
+                self.current_slide_index += 1
+                self.drawing_area.queue_draw()
 
     def on_key_press(self, win, event):
         """Callback for key-press-event."""
