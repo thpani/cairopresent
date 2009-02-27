@@ -3,7 +3,7 @@
 # http://www.ted.com/index.php/talks/larry_lessig_says_the_law_is_strangling_creativity.html 
 #
 # Empty lines are treated as slide breaks.
-# To render an empty line put a blank.
+# To render an empty line put a blank in the according line.
 
 ugc
 
