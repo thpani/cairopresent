@@ -4,6 +4,7 @@
 
 import os
 
+import cairo
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -23,6 +24,10 @@ class MainWindow(gtk.Window):
         self.slides = presentation.slides
         self.current_slide_index = 0
         self.goto_buffer = None
+
+        self.in_transition = 1  # 1 to fade in; -1 to fade out
+        self.transition_alpha = 0
+        self.cache = {}
         
         self.renderer = presentation.renderer
         
@@ -96,17 +101,43 @@ class MainWindow(gtk.Window):
     def on_window_state(self, win, event):
         """Callback for window-state-event."""
         self._is_fullscreen = bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN)
+        self.cache = {}
     
         return False
     
     def expose(self, drawing_area, event):
         """Callback for expose-event."""
-        cr = drawing_area.window.cairo_create()
         cr_width, cr_height = drawing_area.window.get_size()
-        current_slide = self.slides[self.current_slide_index]
-        self.renderer.render_slide(cr, cr_width, cr_height, current_slide)
+
+        buffer = cairo.ImageSurface(cairo.FORMAT_ARGB32, cr_width, cr_height)
+        cr = cairo.Context(buffer)
+
+        current_slide = None
+        if not self.current_slide_index in self.cache:
+            current_slide_desc = self.slides[self.current_slide_index]
+            self.renderer.render_slide(cr, cr_width, cr_height,
+                                       current_slide_desc)
+            current_slide = buffer
+            self.cache[self.current_slide_index] = current_slide
+        else:
+            current_slide = self.cache[self.current_slide_index]
+
+        cr = drawing_area.window.cairo_create()
+        cr.set_source_surface(current_slide)
+        cr.paint()
+
+        if self.in_transition:
+            cr.set_source_rgba(0, 0, 0, self.transition_alpha)
+            cr.paint()
+            if abs(self.transition_alpha) > 1.2:
+                self.in_transition = -self.in_transition
+            self.transition_alpha += 0.025 * self.in_transition
+            self.drawing_area.queue_draw()
         
         return False
+
+    def do_transition(self):
+        pass
     
 def main():
     file0 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', 'test.png')
