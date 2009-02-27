@@ -18,7 +18,7 @@ class Presentation(object):
         """Creates a PZ style presentation object.
         
         @type  filename: string
-        @param filename: Path to the Presentation.
+        @param filename: Path to the presentation.
         """
         
         self.slides = self.parse_file(filename)
@@ -33,9 +33,12 @@ class Presentation(object):
         for line in f:
             if line.startswith('#'):
                 continue
-            elif line in ('\r\n', '\n') and current_slide:
-                slides.append(current_slide)
-                current_slide = ''
+            elif line in ('\r\n', '\n'):
+                if current_slide:
+                    slides.append(current_slide)
+                    current_slide = ''
+                else:
+                    pass    # ^\n$ at beginning of presentation
             else:
                 line = line.replace('<', '&lt;')
                 line = line.replace('>', '&gt;')
