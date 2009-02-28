@@ -20,6 +20,9 @@ class Presentation(object):
         """
         self.slides = slides
         self.renderer = Renderer
+
+    def show_transition(self, from_slide, to_slide):
+        return True
         
         
 class Renderer(object):

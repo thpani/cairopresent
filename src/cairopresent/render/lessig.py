@@ -21,12 +21,14 @@ class Presentation(object):
         @param filename: Path to the presentation.
         """
         
+        self.no_transition = []
         self.slides = self.parse_file(filename)
         self.renderer = Renderer(os.path.dirname(filename))
         
     def parse_file(self, filename):
         slides = []
         current_slide = ''
+        slide_index = 0
         
         f = open(filename)
         open_emph = False
@@ -36,9 +38,18 @@ class Presentation(object):
             elif line in ('\r\n', '\n'):
                 if current_slide:
                     slides.append(current_slide)
+                    slide_index += 1
                     current_slide = ''
                 else:
                     pass    # ^\n$ at beginning of presentation
+            elif line in ('+\r\n', '+\n'):
+                if current_slide:
+                    slides.append(current_slide)
+                    self.no_transition.append((slide_index, slide_index+1))
+                    slide_index += 1
+                    current_slide = ''
+                else:
+                    pass    # ^+\n$ at beginning of presentation
             else:
                 line = line.replace('<', '&lt;')
                 line = line.replace('>', '&gt;')
@@ -54,6 +65,11 @@ class Presentation(object):
             slides.append(current_slide)
                         
         return slides
+
+    def show_transition(self, from_slide, to_slide):
+        if (from_slide, to_slide) in self.no_transition:
+            return False
+        return True
         
 class Renderer(object):
     """A renderer for Lessig style rendering.
@@ -106,10 +122,10 @@ class Renderer(object):
             # render some text (w/ pango)
             pc = pangocairo.CairoContext(cr)
             layout = pc.create_layout()
-            layout.set_font_description(pango.FontDescription("1942 report %d" % int(cr_height/20.)))
+            layout.set_font_description(pango.FontDescription("Yanone Tagesschrift %d" % int(cr_height/20.)))
             layout.set_markup(slide)
             layout.set_alignment(pango.ALIGN_CENTER)
-            layout.set_spacing(int(1./50 * cr_height * pango.SCALE))
+            layout.set_spacing(int(1./25 * cr_height * pango.SCALE))
             ink_rect, logical_rect = layout.get_pixel_extents()
             tx, ty, tw, th = logical_rect
             cr.move_to((cr_width - tw)/2, (cr_height - th)/2)

@@ -15,8 +15,8 @@ import cairopresent
 from cairopresent.helpers.resources import *
 
 
-TRANSITION_TIMEOUT = 5 # ms steps between fade gradients
-TRANSITION_STEP = 0.1  # alpha delta between fade gradients
+TRANSITION_TIMEOUT = 50 # ms steps between fade gradients
+TRANSITION_STEP = 0.2  # alpha delta between fade gradients
 
 gtk.gdk.threads_init()
 
@@ -29,6 +29,7 @@ class MainWindow(gtk.Window):
         self.set_title("CairoPresent")
         self.set_icon_from_file(get_res('icon.png'))
         
+        self.presentation = presentation
         self.slides = presentation.slides
         self.current_slide_index = 0
         self.goto_buffer = None
@@ -148,6 +149,12 @@ class MainWindow(gtk.Window):
         if len(self.slides) <= self.current_slide_index + direction or \
            self.current_slide_index + direction < 0:
             return False
+
+        if not self.presentation.show_transition(self.current_slide_index,
+                self.current_slide_index + direction):
+            self.current_slide_index += direction
+            self.drawing_area.queue_draw()
+            return True
 
         self.in_transition = 1
         self.transition_alpha = 0

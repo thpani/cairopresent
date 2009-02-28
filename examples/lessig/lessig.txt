@@ -1,6 +1,6 @@
 # TED Talks
 # Larry Lessig: How creativity is being strangled by the law
-# http://www.ted.com/index.php/talks/larry_lessig_says_the_law_is_strangling_creativity.html 
+# http://www.ted.com/index.php/talks/larry_lessig_says_the_law_is_strangling_creativity.html
 #
 # Empty lines are treated as slide breaks.
 # To render an empty line put a blank in the according line.
@@ -44,7 +44,7 @@ came from the ape.
 
  
 culture
-
++
 read-write
 culture
 
@@ -68,25 +68,25 @@ RO
 
 creativity
  
-
++
 creativity
 consumed
 
 consumer
  
  
-
++
 consumer
 not a
  
-
++
 consumer
 not a
 creator
 
 culture
  
-
++
 culture
 top-down
 
