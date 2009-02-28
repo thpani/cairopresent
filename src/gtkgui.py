@@ -3,14 +3,22 @@
 """GTK GUI for CairoPresent."""
 
 import os
+from threading import Thread
 
 import cairo
 import pygtk
 pygtk.require('2.0')
+import gobject
 import gtk
 
 import cairopresent
 from cairopresent.helpers.resources import *
+
+
+TRANSITION_TIMEOUT = 5 # ms steps between fade gradients
+TRANSITION_STEP = 0.1  # alpha delta between fade gradients
+
+gtk.gdk.threads_init()
 
 class MainWindow(gtk.Window):
     """Main presentation window."""
@@ -25,8 +33,10 @@ class MainWindow(gtk.Window):
         self.current_slide_index = 0
         self.goto_buffer = None
 
-        self.in_transition = 1  # 1 to fade in; -1 to fade out
+        self.in_transition = 0  # 1 to fade in; -1 to fade out
         self.transition_alpha = 0
+        self.transition_next_index = None
+
         self.cache = {}
         
         self.renderer = presentation.renderer
@@ -50,9 +60,7 @@ class MainWindow(gtk.Window):
     def on_button_press(self, win, event):
         x, y, state = event.window.get_pointer()
         if state & gtk.gdk.BUTTON1_MASK:
-            if self.current_slide_index + 1 < len(self.slides):
-                self.current_slide_index += 1
-                self.drawing_area.queue_draw()
+            self.transition()
 
     def on_key_press(self, win, event):
         """Callback for key-press-event."""
@@ -63,19 +71,13 @@ class MainWindow(gtk.Window):
             else:
                 self.fullscreen()
         elif key in ('Right', 'space', 'Page_Down'):
-            if self.current_slide_index + 1 < len(self.slides):
-                self.current_slide_index += 1
-                self.drawing_area.queue_draw()
+            self.transition()
         elif key in ('Left', 'BackSpace', 'Page_Up'):
-            if self.current_slide_index > 0:
-                self.current_slide_index -= 1
-                self.drawing_area.queue_draw()
+            self.transition(-1)
         elif key in ('Home'):
-            self.current_slide_index = 0
-            self.drawing_area.queue_draw()
+            self.transition(-self.current_slide_index)
         elif key in ('End'):
-            self.current_slide_index = len(self.slides) - 1
-            self.drawing_area.queue_draw()
+            self.transition(len(self.slides) - self.current_slide_index - 1)
         elif key in ('Escape'):
             if self._is_fullscreen:
                 self.unfullscreen()
@@ -89,9 +91,7 @@ class MainWindow(gtk.Window):
         elif key in ('Return', 'g', 'G'):
             if self.goto_buffer is not None:
                 target = int(self.goto_buffer)-1
-                if 0 <= target < len(self.slides):
-                    self.current_slide_index = target
-                    self.drawing_area.queue_draw()
+                self.transition(target - self.current_slide_index)
                 self.goto_buffer = None
         else:
             print key   # TODO
@@ -100,27 +100,20 @@ class MainWindow(gtk.Window):
     
     def on_window_state(self, win, event):
         """Callback for window-state-event."""
-        self._is_fullscreen = bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN)
-        self.cache = {}
+        if self._is_fullscreen != bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN):
+            self._is_fullscreen = bool(event.new_window_state & gtk.gdk.WINDOW_STATE_FULLSCREEN)
+            self.invalidate_cache()
     
         return False
     
     def expose(self, drawing_area, event):
         """Callback for expose-event."""
+
+        cr = drawing_area.window.cairo_create()
         cr_width, cr_height = drawing_area.window.get_size()
 
-        buffer = cairo.ImageSurface(cairo.FORMAT_ARGB32, cr_width, cr_height)
-        cr = cairo.Context(buffer)
-
-        current_slide = None
-        if not self.current_slide_index in self.cache:
-            current_slide_desc = self.slides[self.current_slide_index]
-            self.renderer.render_slide(cr, cr_width, cr_height,
-                                       current_slide_desc)
-            current_slide = buffer
-            self.cache[self.current_slide_index] = current_slide
-        else:
-            current_slide = self.cache[self.current_slide_index]
+        self.render_into_cache(self.current_slide_index)
+        current_slide = self.cache[self.current_slide_index]
 
         cr = drawing_area.window.cairo_create()
         cr.set_source_surface(current_slide)
@@ -129,16 +122,56 @@ class MainWindow(gtk.Window):
         if self.in_transition:
             cr.set_source_rgba(0, 0, 0, self.transition_alpha)
             cr.paint()
-            if abs(self.transition_alpha) > 1.2:
-                self.in_transition = -self.in_transition
-            self.transition_alpha += 0.025 * self.in_transition
-            self.drawing_area.queue_draw()
-        
+       
         return False
 
-    def do_transition(self):
-        pass
-    
+    def invalidate_cache(self):
+        self.cache = {}
+
+    def render_into_cache(self, slide_index):
+        if slide_index in self.cache:
+            return
+
+        cr_width, cr_height = self.drawing_area.window.get_size()
+        buffer = cairo.ImageSurface(cairo.FORMAT_ARGB32, cr_width, cr_height)
+        cr = cairo.Context(buffer)
+        cr_width, cr_height = buffer.get_width(), buffer.get_height()
+        current_slide_desc = self.slides[slide_index]
+        self.renderer.render_slide(cr, cr_width, cr_height,
+                                   current_slide_desc)
+        self.cache[slide_index] = buffer
+
+    def transition(self, direction=1):
+        if direction == 0:
+            return True
+
+        if len(self.slides) <= self.current_slide_index + direction or \
+           self.current_slide_index + direction < 0:
+            return False
+
+        self.in_transition = 1
+        self.transition_alpha = 0
+        self.transition_next_index = self.current_slide_index + direction
+        gobject.timeout_add(TRANSITION_TIMEOUT, self.transition_callback)
+        return True
+
+    def transition_callback(self):
+        if self.in_transition == -1 and self.transition_alpha < 0:
+            # fade finished
+            self.in_transition = 0  # 1 to fade in; -1 to fade out
+            self.transition_alpha = 0
+            self.transition_next_index = None
+            return False
+
+        if self.transition_alpha > 1.1:
+            # u-turn fade-out -> fade-in
+            self.in_transition = -self.in_transition
+            self.current_slide_index = self.transition_next_index
+        self.transition_alpha += TRANSITION_STEP * self.in_transition
+
+        self.drawing_area.queue_draw()
+        return True # return True to continue calling timeout
+
 def main():
     file0 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', 'test.png')
     file1 = os.path.join(cairopresent.helpers.resources.EXAMPLE_PATH, 'thp', '161547780_81e990d7f7_o.jpg')
@@ -150,12 +183,12 @@ def main():
     
     presentation = cairopresent.render.thp.Presentation(slides)
     
-    MainWindow(presentation)
+    w = MainWindow(presentation)
     gtk.main()
     
     presentation = cairopresent.render.lessig.Presentation(get_example('lessig.txt'))
     
-    MainWindow(presentation)
+    w = MainWindow(presentation)
     gtk.main()
 
 if __name__ == '__main__':
