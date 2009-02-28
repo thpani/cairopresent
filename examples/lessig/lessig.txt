@@ -2,8 +2,10 @@
 # Larry Lessig: How creativity is being strangled by the law
 # http://www.ted.com/index.php/talks/larry_lessig_says_the_law_is_strangling_creativity.html
 #
-# Empty lines are treated as slide breaks.
-# To render an empty line put a blank in the according line.
+# - Empty lines are treated as slide breaks.
+# - Lines consisting only of '+' will be treated as slide breaks,
+#   but will not show fade-out/fade-in transition animation.
+# - To render an empty line put a blank in the according line.
 
 ugc
 
